@@ -1,0 +1,44 @@
+services:
+  sqlserver:
+    container_name: sqlserver
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      MSSQL_SA_PASSWORD: "Ngtnh@0103"
+      ACCEPT_EULA: "Y"  
+    ports:
+      - "1433:1433" 
+    volumes:
+      - sql_data:/var/opt/mssql
+    restart: always
+    networks:
+      - lab1-api-networks
+    healthcheck:
+      test: ["CMD", "sqlcmd", "-U", "sa", "-P", "Ngtnh@0103", "-Q", "SELECT 1"]
+      interval: 30s
+      retries: 3
+      start_period: 30s
+      timeout: 30s
+
+  lab1-api:
+    container_name: lab1_api
+    image: lab1-aspnet:latest 
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__FStoreDB=Server=sqlserver; Database= FStoreDB; Uid = sa; Pwd = Ngtnh@0103; TrustServerCertificate=True
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - lab1-api-networks
+    ports:
+      - 8080:80
+    depends_on:
+      - sqlserver
+    restart: always
+
+networks:
+  lab1-api-networks:
+    name: lab1_api_networks
+
+volumes:
+  sql_data:

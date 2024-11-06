@@ -1,0 +1,7 @@
+services:
+  lab1-api:
+    container_name: lab1_api
+    image: lab1-aspnet:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
